@@ -1,0 +1,16 @@
+[package]
+name = "annoda-adapter-loopback"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "In-memory reference adapter for Annoda."
+publish = false
+
+[dependencies]
+annoda = { path = "../../crates/annoda" }
+
+[dev-dependencies]
+annoda-testkit = { path = "../../crates/annoda-testkit" }

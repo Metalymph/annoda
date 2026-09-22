@@ -1,0 +1,36 @@
+name: Adapter proposal
+description: Propose support for a new P2P stack.
+title: "[adapter] "
+labels: ["adapter"]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Upstream stack
+      description: Name and URL of the P2P project/stack.
+    validations:
+      required: true
+
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Architecture
+      description: Identity, discovery, NAT traversal, relay, transport, runtime, and supported platforms.
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and privacy
+      description: Transport security, bootstrap/relay trust, metadata exposure, and key persistence.
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Annoda capabilities
+      description: Which current Annoda capabilities can this adapter implement honestly?
+    validations:
+      required: true

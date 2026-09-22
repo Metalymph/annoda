@@ -1,0 +1,15 @@
+[package]
+name = "annoda"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "A transport-agnostic adapter contract for peer-to-peer messaging."
+readme = "README.md"
+keywords = ["p2p", "messaging", "networking", "adapter", "transport"]
+categories = ["network-programming"]
+publish = ["crates-io"]
+
+[dependencies]
