@@ -1,0 +1,173 @@
+name: Node proposal
+description: Propose bidirectional interoperability between two P2P protocols.
+title: "[node] "
+labels:
+  - node
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Annoda nodes provide explicit bidirectional interoperability between
+        two otherwise incompatible P2P protocols.
+
+        A proposal should explain how an Annoda-enabled peer can communicate
+        with an unmodified native peer of the other protocol.
+
+  - type: input
+    id: protocol_a
+    attributes:
+      label: Protocol A
+      description: Name and upstream URL of the first P2P protocol or stack.
+      placeholder: "Example: Hyperswarm — https://..."
+    validations:
+      required: true
+
+  - type: input
+    id: protocol_b
+    attributes:
+      label: Protocol B
+      description: Name and upstream URL of the second P2P protocol or stack.
+      placeholder: "Example: Iroh — https://..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions and compatibility range
+      description: |
+        Identify the protocol versions or compatibility ranges the proposed
+        node intends to support.
+    validations:
+      required: true
+
+  - type: textarea
+    id: platforms
+    attributes:
+      label: Platforms and runtimes
+      description: |
+        Describe relevant operating systems, architectures, language runtimes,
+        native libraries, FFI requirements, or other platform constraints.
+    validations:
+      required: true
+
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Interoperability architecture
+      description: |
+        Explain how the node would provide Protocol A <-> Protocol B
+        interoperability while leaving the remote native peer unmodified.
+
+        Include the expected node placement and how both A -> B and B -> A
+        communication would work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: wire
+    attributes:
+      label: Wire representation and conversion
+      description: |
+        Describe relevant differences in framing, encoding, codecs, envelopes,
+        handshakes, stream representation, multiplexing, or other wire
+        behaviour.
+
+        Explain what conversion is expected to be necessary to preserve exact
+        application payload bytes in both directions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: networking
+    attributes:
+      label: Networking model
+      description: |
+        Describe identity, addressing, discovery, NAT traversal, relay,
+        bootstrap, rendezvous, connection lifecycle, and reconnect behaviour
+        where relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: payload_parity
+    attributes:
+      label: Payload byte-stream parity
+      description: |
+        Explain how the node can guarantee:
+
+        send_A(payload) -> receive_B(payload)
+        send_B(payload) -> receive_A(payload)
+
+        with the exact application payload byte sequence preserved.
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Declared capability profile
+      description: |
+        Describe the intended baseline messaging support and any additional
+        capabilities such as large payloads, chunked transfer, blobs, files,
+        or recorded audio.
+
+        Also identify known unsupported capabilities.
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and privacy
+      description: |
+        Describe peer identity, authentication, transport confidentiality,
+        integrity, key handling, downgrade risks, relay/bootstrap/discovery
+        trust, metadata exposure, and any security differences between the two
+        protocols.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Implementation strategy and dependencies
+      description: |
+        Describe the expected implementation approach and major dependencies.
+
+        Include protocol implementations, native libraries, runtimes, FFI,
+        WASM, or other significant integration requirements where applicable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: conformance
+    attributes:
+      label: Native-peer conformance plan
+      description: |
+        Explain how the node can be tested against unmodified native
+        implementations of both protocols.
+
+        The plan should cover both directions and exact application payload
+        byte-stream parity.
+    validations:
+      required: true
+
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Known limitations and open questions
+      description: |
+        List known incompatibilities, unresolved protocol differences,
+        implementation risks, or questions that must be answered before the
+        node can become supported.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contract
+    attributes:
+      label: Annoda contract
+      options:
+        - label: I have reviewed `docs/CONTRACT.md` and this proposal does not require an intermediate Annoda wire protocol or modifications to the remote native peer.
+          required: true
