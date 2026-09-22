@@ -1,0 +1,13 @@
+[package]
+name = "annoda-testkit"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Conformance helpers for Annoda adapters."
+publish = false
+
+[dependencies]
+annoda = { path = "../annoda" }
