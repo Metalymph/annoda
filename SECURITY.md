@@ -1,6 +1,6 @@
 # Security Policy
 
-Annoda is security-sensitive infrastructure.
+Idalion is security-sensitive infrastructure.
 
 ## Reporting a vulnerability
 
@@ -20,5 +20,5 @@ Adapter PRs must document:
 - persistence of keys or peer state;
 - dependency/runtime risks.
 
-Annoda does not treat transport encryption as equivalent to application-level
+Idalion does not treat transport encryption as equivalent to application-level
 end-to-end encryption.

@@ -4,7 +4,7 @@
 
 ## Contract impact
 
-- [ ] No Annoda public SPI change.
+- [ ] No Idalion public SPI change.
 - [ ] Public SPI change is required and justified by more than one real adapter.
 
 ## Quality gate

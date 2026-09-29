@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome, but Annoda intentionally keeps a narrow public
+Contributions are welcome, but Idalion intentionally keeps a narrow public
 surface.
 
 ## Before opening code
@@ -16,7 +16,7 @@ For a new adapter, open an **Adapter proposal** issue first. Describe:
 - metadata exposure;
 - runtime requirements;
 - dependency footprint;
-- which Annoda capabilities can be implemented honestly.
+- which Idalion capabilities can be implemented honestly.
 
 ## Pull request gate
 
@@ -27,7 +27,7 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-targets --all-features
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
-cargo package -p annoda
+cargo package -p idalion
 ```
 
 Public APIs and data must be documented.

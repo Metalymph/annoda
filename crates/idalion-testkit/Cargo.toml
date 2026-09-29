@@ -1,13 +1,13 @@
 [package]
-name = "annoda-testkit"
+name = "idalion-testkit"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "Conformance helpers for Annoda adapters."
+description = "Conformance helpers for Idalion adapters."
 publish = false
 
 [dependencies]
-annoda = { path = "../annoda" }
+idalion = { path = "../idalion" }

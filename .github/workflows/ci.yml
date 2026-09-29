@@ -52,4 +52,4 @@ jobs:
 
       - name: Package
         if: matrix.toolchain == 'stable'
-        run: cargo package -p annoda --locked
+        run: cargo package -p idalion --locked

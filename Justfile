@@ -22,6 +22,6 @@ docs:
     RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 
 package:
-    cargo package -p annoda
+    cargo package -p idalion
 
 ci: fmt-check check clippy test docs package

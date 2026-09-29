@@ -3,20 +3,20 @@
 version = 4
 
 [[package]]
-name = "annoda"
+name = "idalion"
 version = "0.0.1"
 
 [[package]]
-name = "annoda-adapter-loopback"
+name = "idalion-adapter-loopback"
 version = "0.0.1"
 dependencies = [
- "annoda",
- "annoda-testkit",
+ "idalion",
+ "idalion-testkit",
 ]
 
 [[package]]
-name = "annoda-testkit"
+name = "idalion-testkit"
 version = "0.0.1"
 dependencies = [
- "annoda",
+ "idalion",
 ]

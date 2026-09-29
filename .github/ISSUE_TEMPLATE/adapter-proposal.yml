@@ -1,36 +1,52 @@
 name: Adapter proposal
-description: Propose support for a new P2P stack.
+description: Propose interoperability with a conversational messaging protocol.
 title: "[adapter] "
 labels: ["adapter"]
 body:
   - type: input
-    id: project
+    id: protocol
     attributes:
-      label: Upstream stack
-      description: Name and URL of the P2P project/stack.
+      label: Protocol or messaging system
+      description: Name and authoritative URL for the protocol, service, SDK, or implementation.
     validations:
       required: true
 
   - type: textarea
     id: architecture
     attributes:
-      label: Architecture
-      description: Identity, discovery, NAT traversal, relay, transport, runtime, and supported platforms.
-    validations:
-      required: true
-
-  - type: textarea
-    id: security
-    attributes:
-      label: Security and privacy
-      description: Transport security, bootstrap/relay trust, metadata exposure, and key persistence.
+      label: Native architecture
+      description: Describe identity, addressing, discovery, authentication, infrastructure, lifecycle, runtime, and supported platforms where relevant.
     validations:
       required: true
 
   - type: textarea
     id: capabilities
     attributes:
-      label: Annoda capabilities
-      description: Which current Annoda capabilities can this adapter implement honestly?
+      label: Idalion capabilities
+      description: Which inbound and outbound conversational capabilities can this adapter implement honestly, and with which constraints?
+    validations:
+      required: true
+
+  - type: textarea
+    id: asymmetry
+    attributes:
+      label: Asymmetry and semantic differences
+      description: Describe directional limitations, unsupported operations, native semantic differences, and any lossy mappings that must not be hidden.
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security boundary
+      description: Describe authentication, transport security, E2EE where applicable, server or relay trust, metadata exposure, persistence, and security properties changed at the protocol boundary.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Implementation and dependencies
+      description: Describe the proposed implementation, native SDK or protocol dependencies, runtime requirements, and why they belong inside the adapter.
     validations:
       required: true
