@@ -33,11 +33,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          crate_version="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "annoda") | .version')"
+          crate_version="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "idalion") | .version')"
           tag_version="${GITHUB_REF_NAME#v}"
 
           if [[ "$crate_version" != "$tag_version" ]]; then
-            echo "tag $GITHUB_REF_NAME does not match annoda version $crate_version" >&2
+            echo "tag $GITHUB_REF_NAME does not match idalion version $crate_version" >&2
             exit 1
           fi
 
@@ -58,7 +58,7 @@ jobs:
         run: cargo doc --workspace --no-deps
 
       - name: Package
-        run: cargo package -p annoda --locked
+        run: cargo package -p idalion --locked
 
       - name: Authenticate with crates.io
         id: crates_io
@@ -67,7 +67,7 @@ jobs:
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates_io.outputs.token }}
-        run: cargo publish -p annoda --locked
+        run: cargo publish -p idalion --locked
 
       - name: Create GitHub Release
         env:

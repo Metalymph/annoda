@@ -3,7 +3,7 @@
 
 //! Shared conformance helpers for Idalion adapter implementations.
 
-use annoda::{Adapter, AdapterDirection, Capability, CapabilitySupport};
+use idalion::{Adapter, AdapterDirection, Capability, CapabilitySupport};
 
 /// Verifies static invariants every adapter must satisfy.
 ///

@@ -11,13 +11,13 @@ After the bootstrap PR is merged:
 git switch main
 git pull --ff-only
 cargo login
-cargo publish -p annoda
+cargo publish -p idalion
 ```
 
-Then configure crates.io **Trusted Publishing** for `annoda`:
+Then configure crates.io **Trusted Publishing** for `idalion`:
 
 - GitHub owner: `Metalymph`
-- repository: `annoda`
+- repository: `idalion`
 - workflow file: `release.yml`
 - environment: leave empty unless you later add a protected GitHub environment
 
@@ -28,7 +28,7 @@ git tag v0.0.1
 git push origin v0.0.1
 ```
 
-The release workflow detects that `annoda 0.0.1` already exists on
+The release workflow detects that `idalion 0.0.1` already exists on
 crates.io, skips publishing it, and creates the GitHub Release.
 
 ## Subsequent releases

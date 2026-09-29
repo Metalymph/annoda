@@ -1,6 +1,6 @@
-use annoda::{Adapter, AdapterEvent, EndpointId, OperationAcceptance, TextContent};
-use annoda_adapter_loopback::LoopbackAdapter;
-use annoda_testkit::{assert_bidirectional_text_support, assert_static_contract};
+use idalion::{Adapter, AdapterEvent, EndpointId, OperationAcceptance, TextContent};
+use idalion_adapter_loopback::LoopbackAdapter;
+use idalion_testkit::{assert_bidirectional_text_support, assert_static_contract};
 
 #[test]
 fn round_trip_text_semantics() {

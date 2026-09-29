@@ -1,16 +1,16 @@
 [package]
-name = "annoda-adapter-loopback"
+name = "idalion-adapter-loopback"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "In-memory reference adapter for Annoda."
+description = "In-memory semantic reference adapter for Idalion."
 publish = false
 
 [dependencies]
-annoda = { path = "../../crates/annoda" }
+idalion = { path = "../../crates/idalion" }
 
 [dev-dependencies]
-annoda-testkit = { path = "../../crates/annoda-testkit" }
+idalion-testkit = { path = "../../crates/idalion-testkit" }

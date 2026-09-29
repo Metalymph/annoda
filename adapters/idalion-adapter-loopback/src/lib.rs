@@ -3,7 +3,7 @@
 
 //! In-memory semantic reference adapter for the Idalion SPI.
 
-use annoda::{
+use idalion::{
     Adapter, AdapterDirection, AdapterEvent, Capability, CapabilitySupport, EndpointId,
     OperationAcceptance, TextContent,
 };

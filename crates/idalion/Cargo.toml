@@ -1,14 +1,14 @@
 [package]
-name = "annoda"
+name = "idalion"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "A transport-agnostic adapter contract for peer-to-peer messaging."
+description = "A protocol-agnostic interoperability contract for conversational messaging."
 readme = "README.md"
-keywords = ["p2p", "messaging", "networking", "adapter", "transport"]
+keywords = ["messaging", "interoperability", "adapter", "protocol"]
 categories = ["network-programming"]
 publish = ["crates-io"]
 
