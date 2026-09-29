@@ -1,31 +1,33 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-//! In-memory reference adapter used to validate Annoda's SPI.
+//! In-memory semantic reference adapter for the Idalion SPI.
 
-use annoda::{Adapter, AdapterCapabilities, AdapterEvent, PeerId};
+use annoda::{
+    Adapter, AdapterDirection, AdapterEvent, Capability, CapabilitySupport, EndpointId,
+    OperationAcceptance, TextContent,
+};
 use std::{
-    collections::VecDeque,
     error::Error,
     fmt,
     sync::mpsc::{self, Receiver, Sender, TryRecvError},
 };
 
-/// An in-memory adapter connected to exactly one peer.
+/// In-memory adapter paired with one destination endpoint.
 ///
-/// Use [`LoopbackAdapter::pair`] to create two compatible endpoints.
+/// The adapter models semantic text exchange only. It deliberately has no
+/// connection lifecycle because connection semantics are not universal to
+/// Idalion adapters.
 pub struct LoopbackAdapter {
-    local: PeerId,
-    remote: PeerId,
+    local: EndpointId,
+    remote: EndpointId,
     sender: Sender<AdapterEvent>,
     receiver: Receiver<AdapterEvent>,
-    local_events: VecDeque<AdapterEvent>,
-    connected: bool,
 }
 
 impl LoopbackAdapter {
-    /// Creates a connected pair of in-memory adapter endpoints.
-    pub fn pair(first: PeerId, second: PeerId) -> (LoopbackAdapter, LoopbackAdapter) {
+    /// Creates a pair of in-memory semantic endpoints.
+    pub fn pair(first: EndpointId, second: EndpointId) -> (LoopbackAdapter, LoopbackAdapter) {
         let (first_tx, first_rx) = mpsc::channel();
         let (second_tx, second_rx) = mpsc::channel();
 
@@ -34,8 +36,6 @@ impl LoopbackAdapter {
             remote: second.clone(),
             sender: second_tx,
             receiver: first_rx,
-            local_events: VecDeque::new(),
-            connected: false,
         };
 
         let second_adapter = LoopbackAdapter {
@@ -43,18 +43,16 @@ impl LoopbackAdapter {
             remote: first,
             sender: first_tx,
             receiver: second_rx,
-            local_events: VecDeque::new(),
-            connected: false,
         };
 
         (first_adapter, second_adapter)
     }
 
-    fn ensure_remote(&self, peer: &PeerId) -> Result<(), LoopbackError> {
-        if peer == &self.remote {
+    fn ensure_destination(&self, endpoint: &EndpointId) -> Result<(), LoopbackError> {
+        if endpoint == &self.remote {
             Ok(())
         } else {
-            Err(LoopbackError::UnknownPeer)
+            Err(LoopbackError::UnknownEndpoint)
         }
     }
 }
@@ -66,101 +64,57 @@ impl Adapter for LoopbackAdapter {
         "loopback"
     }
 
-    fn local_peer_id(&self) -> &PeerId {
-        &self.local
-    }
-
-    fn capabilities(&self) -> AdapterCapabilities {
-        AdapterCapabilities {
-            direct_connections: true,
-            relayed_connections: false,
-            peer_discovery: false,
-            reliable_delivery: true,
-            ordered_delivery: true,
+    fn capability(
+        &self,
+        capability: Capability,
+        _direction: AdapterDirection,
+    ) -> CapabilitySupport {
+        match capability {
+            Capability::Text => CapabilitySupport::Supported,
+            _ => CapabilitySupport::Unsupported,
         }
     }
 
-    fn connect(&mut self, peer: &PeerId) -> Result<(), Self::Error> {
-        self.ensure_remote(peer)?;
-
-        if !self.connected {
-            self.connected = true;
-            self.local_events.push_back(AdapterEvent::Connected {
-                peer: self.remote.clone(),
-            });
-            self.sender
-                .send(AdapterEvent::Connected {
-                    peer: self.local.clone(),
-                })
-                .map_err(|_| LoopbackError::PeerClosed)?;
-        }
-
-        Ok(())
-    }
-
-    fn send(&mut self, peer: &PeerId, payload: &[u8]) -> Result<(), Self::Error> {
-        self.ensure_remote(peer)?;
-
-        if !self.connected {
-            return Err(LoopbackError::NotConnected);
-        }
+    fn send_text(
+        &mut self,
+        destination: &EndpointId,
+        content: &TextContent,
+    ) -> Result<OperationAcceptance, Self::Error> {
+        self.ensure_destination(destination)?;
 
         self.sender
-            .send(AdapterEvent::Frame {
-                peer: self.local.clone(),
-                payload: payload.into(),
+            .send(AdapterEvent::TextReceived {
+                source: self.local.clone(),
+                content: content.clone(),
             })
-            .map_err(|_| LoopbackError::PeerClosed)
+            .map_err(|_| LoopbackError::RemoteClosed)?;
+
+        Ok(OperationAcceptance::Accepted)
     }
 
     fn poll_event(&mut self) -> Result<Option<AdapterEvent>, Self::Error> {
-        if let Some(event) = self.local_events.pop_front() {
-            return Ok(Some(event));
-        }
-
         match self.receiver.try_recv() {
             Ok(event) => Ok(Some(event)),
             Err(TryRecvError::Empty) => Ok(None),
-            Err(TryRecvError::Disconnected) => Err(LoopbackError::PeerClosed),
+            Err(TryRecvError::Disconnected) => Err(LoopbackError::RemoteClosed),
         }
-    }
-
-    fn disconnect(&mut self, peer: &PeerId) -> Result<(), Self::Error> {
-        self.ensure_remote(peer)?;
-
-        if self.connected {
-            self.connected = false;
-            self.local_events.push_back(AdapterEvent::Disconnected {
-                peer: self.remote.clone(),
-            });
-            self.sender
-                .send(AdapterEvent::Disconnected {
-                    peer: self.local.clone(),
-                })
-                .map_err(|_| LoopbackError::PeerClosed)?;
-        }
-
-        Ok(())
     }
 }
 
 /// Errors produced by [`LoopbackAdapter`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LoopbackError {
-    /// The requested peer is not the endpoint paired with this adapter.
-    UnknownPeer,
-    /// A send was attempted before connectivity was established.
-    NotConnected,
-    /// The paired endpoint has been dropped.
-    PeerClosed,
+    /// The requested destination is not paired with this adapter.
+    UnknownEndpoint,
+    /// The paired in-memory endpoint has been dropped.
+    RemoteClosed,
 }
 
 impl fmt::Display for LoopbackError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         let message = match self {
-            Self::UnknownPeer => "unknown loopback peer",
-            Self::NotConnected => "loopback peer is not connected",
-            Self::PeerClosed => "loopback peer has closed",
+            Self::UnknownEndpoint => "unknown loopback endpoint",
+            Self::RemoteClosed => "loopback remote endpoint has closed",
         };
 
         formatter.write_str(message)

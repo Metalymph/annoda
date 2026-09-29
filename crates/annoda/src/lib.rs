@@ -1,134 +1,202 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-//! Transport-agnostic primitives and adapter SPI for peer-to-peer messaging.
+//! Protocol-agnostic interoperability primitives for conversational messaging.
 //!
-//! Annoda deliberately does not prescribe a concrete P2P stack. Adapters own
-//! the translation between this small contract and a concrete implementation.
+//! Idalion models conversational semantics rather than transport frames. Concrete
+//! adapters translate this contract to native messaging protocols.
 
 use std::{error::Error, fmt};
 
-/// Stable identity of a remote or local peer as understood by an adapter.
+/// Opaque identity of a messaging endpoint as understood by an adapter.
 ///
-/// Annoda treats peer identifiers as opaque bytes. Their concrete encoding and
-/// cryptographic meaning belong to the adapter and its underlying stack.
+/// Depending on the native protocol, an endpoint may represent a peer, account,
+/// user, device, conversation, group, channel, or another native destination.
+/// Idalion does not interpret the identifier bytes.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct PeerId(Box<[u8]>);
+pub struct EndpointId(Box<[u8]>);
 
-impl PeerId {
-    /// Creates a peer identifier from non-empty opaque bytes.
-    pub fn new(bytes: impl Into<Box<[u8]>>) -> Result<Self, PeerIdError> {
+impl EndpointId {
+    /// Creates an endpoint identifier from non-empty opaque bytes.
+    pub fn new(bytes: impl Into<Box<[u8]>>) -> Result<Self, EndpointIdError> {
         let bytes = bytes.into();
 
         if bytes.is_empty() {
-            return Err(PeerIdError);
+            return Err(EndpointIdError);
         }
 
         Ok(Self(bytes))
     }
 
-    /// Returns the opaque peer identifier bytes.
+    /// Returns the opaque endpoint identifier bytes.
     #[must_use]
     pub fn as_bytes(&self) -> &[u8] {
         &self.0
     }
 }
 
-/// Error returned when a peer identifier is empty.
+/// Error returned when an endpoint identifier is empty.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct PeerIdError;
+pub struct EndpointIdError;
 
-impl fmt::Display for PeerIdError {
+impl fmt::Display for EndpointIdError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("peer identifiers must not be empty")
+        formatter.write_str("endpoint identifiers must not be empty")
     }
 }
 
-impl Error for PeerIdError {}
+impl Error for EndpointIdError {}
 
-/// Capabilities explicitly provided by an adapter.
+/// Conversational capability understood by the current Idalion contract.
 ///
-/// Capability discovery prevents Annoda from pretending that every underlying
-/// P2P stack has identical semantics.
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct AdapterCapabilities {
-    /// The adapter can establish direct peer-to-peer connections.
-    pub direct_connections: bool,
-    /// The adapter can fall back to relayed connectivity.
-    pub relayed_connections: bool,
-    /// The adapter can discover peers without an already-known endpoint.
-    pub peer_discovery: bool,
-    /// Delivered frames are reliable.
-    pub reliable_delivery: bool,
-    /// Delivered frames preserve send order.
-    pub ordered_delivery: bool,
+/// Capabilities are added only when real adapters demonstrate a shared semantic
+/// operation. The initial contract intentionally starts with text messaging.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[non_exhaustive]
+pub enum Capability {
+    /// Sending and receiving textual conversational content.
+    Text,
 }
 
-/// An event emitted by an [`Adapter`].
+/// Support declared by an adapter for one capability in one boundary direction.
+///
+/// Constraint-bearing support will be introduced when concrete native adapters
+/// establish the first constraints that Idalion must represent.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[non_exhaustive]
+pub enum CapabilitySupport {
+    /// The capability is supported without a currently modelled constraint.
+    Supported,
+    /// The capability is not supported.
+    Unsupported,
+}
+
+/// Direction of a capability relative to the adapter/application boundary.
+///
+/// This is deliberately not a protocol-A-to-protocol-B direction. Cross-protocol
+/// interoperability is derived by composing the relevant adapter capabilities.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum AdapterDirection {
+    /// Operations emitted by the application toward the native protocol.
+    Outbound,
+    /// Operations observed from the native protocol by the application.
+    Inbound,
+}
+
+/// UTF-8 textual conversational content.
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TextContent(Box<str>);
+
+impl TextContent {
+    /// Creates textual content.
+    ///
+    /// Empty text is currently rejected because the initial semantic contract has
+    /// no native-protocol evidence requiring an empty text operation.
+    pub fn new(text: impl Into<Box<str>>) -> Result<Self, TextContentError> {
+        let text = text.into();
+
+        if text.is_empty() {
+            return Err(TextContentError);
+        }
+
+        Ok(Self(text))
+    }
+
+    /// Returns the textual content.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// Error returned when textual content is empty.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TextContentError;
+
+impl fmt::Display for TextContentError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("text content must not be empty")
+    }
+}
+
+impl Error for TextContentError {}
+
+/// Immediate acceptance of an outbound conversational operation.
+///
+/// Acceptance means only that the adapter accepted responsibility for the
+/// operation. It does not imply remote delivery, persistence, or read state.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[non_exhaustive]
+pub enum OperationAcceptance {
+    /// The adapter accepted the operation for native processing.
+    Accepted,
+}
+
+/// Event emitted by an [`Adapter`] from its native protocol boundary.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[non_exhaustive]
 pub enum AdapterEvent {
-    /// Connectivity to a peer became usable.
-    Connected {
-        /// The peer that became connected.
-        peer: PeerId,
-    },
-    /// Connectivity to a peer ended.
-    Disconnected {
-        /// The peer that disconnected.
-        peer: PeerId,
-    },
-    /// A framed application payload arrived from a peer.
-    Frame {
-        /// The peer that sent the payload.
-        peer: PeerId,
-        /// Opaque application bytes.
-        payload: Box<[u8]>,
+    /// Textual conversational content was received from a native endpoint.
+    TextReceived {
+        /// Native source endpoint as represented by this adapter.
+        source: EndpointId,
+        /// Received textual content.
+        content: TextContent,
     },
 }
 
-/// Minimal SPI implemented by concrete P2P adapters.
+/// Minimal protocol adapter boundary for conversational interoperability.
 ///
-/// The polling model is intentional: an adapter may internally use Tokio,
-/// JavaScript/Bare, native threads, callbacks, or another runtime while Annoda
-/// itself remains runtime-agnostic and FFI-friendly.
+/// The SPI is intentionally runtime-agnostic. An implementation may internally
+/// use async runtimes, native event loops, callbacks, worker threads, service
+/// SDKs, JavaScript/Bare, or another protocol-appropriate execution model.
 pub trait Adapter {
-    /// Adapter-specific error type.
+    /// Adapter-specific operational error.
     type Error: Error + Send + Sync + 'static;
 
-    /// Returns a stable, human-readable adapter name.
+    /// Returns a stable human-readable adapter name.
     fn name(&self) -> &'static str;
 
-    /// Returns the local peer identity exposed by this adapter.
-    fn local_peer_id(&self) -> &PeerId;
+    /// Reports support for a conversational capability in one adapter direction.
+    fn capability(&self, capability: Capability, direction: AdapterDirection) -> CapabilitySupport;
 
-    /// Returns the capabilities supported by this adapter.
-    fn capabilities(&self) -> AdapterCapabilities;
+    /// Requests transmission of textual conversational content to an endpoint.
+    ///
+    /// A successful return reports immediate adapter acceptance only. It does not
+    /// imply delivery or read state.
+    fn send_text(
+        &mut self,
+        destination: &EndpointId,
+        content: &TextContent,
+    ) -> Result<OperationAcceptance, Self::Error>;
 
-    /// Requests connectivity to `peer`.
-    fn connect(&mut self, peer: &PeerId) -> Result<(), Self::Error>;
-
-    /// Sends one opaque application frame to `peer`.
-    fn send(&mut self, peer: &PeerId, payload: &[u8]) -> Result<(), Self::Error>;
-
-    /// Polls the next adapter event without blocking.
+    /// Polls the next native conversational event without blocking.
     fn poll_event(&mut self) -> Result<Option<AdapterEvent>, Self::Error>;
-
-    /// Requests disconnection from `peer`.
-    fn disconnect(&mut self, peer: &PeerId) -> Result<(), Self::Error>;
 }
 
 #[cfg(test)]
 mod tests {
-    use super::PeerId;
+    use super::{EndpointId, TextContent};
 
     #[test]
-    fn peer_id_rejects_empty_bytes() {
-        assert!(PeerId::new(Vec::<u8>::new()).is_err());
+    fn endpoint_id_rejects_empty_bytes() {
+        assert!(EndpointId::new(Vec::<u8>::new()).is_err());
     }
 
     #[test]
-    fn peer_id_preserves_bytes() {
-        let peer = PeerId::new(vec![1_u8, 2, 3]).expect("valid peer id");
-        assert_eq!(peer.as_bytes(), &[1, 2, 3]);
+    fn endpoint_id_preserves_opaque_bytes() {
+        let endpoint = EndpointId::new(vec![1_u8, 2, 3]).expect("valid endpoint id");
+        assert_eq!(endpoint.as_bytes(), &[1, 2, 3]);
+    }
+
+    #[test]
+    fn text_content_rejects_empty_text() {
+        assert!(TextContent::new("").is_err());
+    }
+
+    #[test]
+    fn text_content_preserves_utf8() {
+        let content = TextContent::new("ciao 👋").expect("valid text");
+        assert_eq!(content.as_str(), "ciao 👋");
     }
 }
