@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-//! Protocol-agnostic interoperability primitives for conversational messaging.
+//! Semantic interoperability primitives for peer-to-peer conversational messaging protocols.
 //!
 //! Idalion models conversational semantics rather than transport frames. Concrete
 //! adapters translate this contract to native messaging protocols.

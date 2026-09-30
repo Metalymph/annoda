@@ -6,7 +6,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "Conformance helpers for Idalion adapters."
+description = "Conformance helpers for Idalion P2P messaging adapters."
 publish = false
 
 [dependencies]
