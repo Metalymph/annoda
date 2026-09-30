@@ -1,21 +1,21 @@
-name: Adapter proposal
-description: Propose interoperability with a conversational messaging protocol.
+name: P2P adapter proposal
+description: Propose interoperability with a peer-to-peer conversational messaging protocol.
 title: "[adapter] "
 labels: ["adapter"]
 body:
   - type: input
     id: protocol
     attributes:
-      label: Protocol or messaging system
-      description: Name and authoritative URL for the protocol, service, SDK, or implementation.
+      label: P2P protocol or messaging stack
+      description: Name and authoritative URL for the protocol, stack, SDK, or implementation.
     validations:
       required: true
 
   - type: textarea
     id: architecture
     attributes:
-      label: Native architecture
-      description: Describe identity, addressing, discovery, authentication, infrastructure, lifecycle, runtime, and supported platforms where relevant.
+      label: Native P2P architecture
+      description: Describe peer identity, addressing, discovery, bootstrap, connection or session lifecycle, NAT traversal, relays, runtime, and supported platforms where relevant.
     validations:
       required: true
 
@@ -39,7 +39,7 @@ body:
     id: security
     attributes:
       label: Security boundary
-      description: Describe authentication, transport security, E2EE where applicable, server or relay trust, metadata exposure, persistence, and security properties changed at the protocol boundary.
+      description: Describe peer authentication, transport security, E2EE where applicable, key ownership, bootstrap or relay trust, metadata exposure, persistence, and security properties changed at the protocol boundary.
     validations:
       required: true
 
@@ -47,6 +47,14 @@ body:
     id: dependencies
     attributes:
       label: Implementation and dependencies
-      description: Describe the proposed implementation, native SDK or protocol dependencies, runtime requirements, and why they belong inside the adapter.
+      description: Describe the proposed implementation, native protocol dependencies, runtime requirements, and why they belong inside the adapter.
     validations:
       required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: This proposal targets a P2P conversational messaging protocol rather than a centralized, service-controlled, or federated messaging platform.
+          required: true

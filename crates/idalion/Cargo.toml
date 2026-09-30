@@ -6,9 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "A protocol-agnostic interoperability contract for conversational messaging."
+description = "Semantic interoperability for peer-to-peer conversational messaging protocols."
+keywords = ["p2p", "messaging", "interoperability", "adapter", "protocol"]
 readme = "README.md"
-keywords = ["messaging", "interoperability", "adapter", "protocol"]
 categories = ["network-programming"]
 publish = ["crates-io"]
 
